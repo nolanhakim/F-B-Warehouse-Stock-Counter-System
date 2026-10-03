@@ -74,3 +74,85 @@ window.openLogout = openLogout;
 window.closeLogout = closeLogout;
 window.openProfile = openProfile;
 window.closeProfile = closeProfile;
+
+function toggleChat() {
+    const panel = document.getElementById('chatPanel');
+    if (!panel) return;
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) {
+        const log = document.getElementById('chatLog');
+        log.scrollTop = log.scrollHeight;
+        document.getElementById('chatInput')?.focus();
+    }
+}
+
+function chatRender(text, who) {
+    const log = document.getElementById('chatLog');
+    const wrap = document.createElement('div');
+    wrap.className = 'flex gap-2';
+    const bubble = document.createElement('div');
+    bubble.className = who === 'user'
+        ? 'ml-auto max-w-[85%] bg-brand text-white rounded-lg px-3 py-2'
+        : 'max-w-[85%] bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm';
+    const safe = document.createElement('span');
+    safe.textContent = text;
+    bubble.innerHTML = safe.innerHTML.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+    bubble.style.whiteSpace = 'pre-wrap';
+    wrap.appendChild(bubble);
+    log.appendChild(wrap);
+    log.scrollTop = log.scrollHeight;
+    return wrap;
+}
+
+async function askQuick(btn) {
+    const form = document.getElementById('chatForm');
+    document.getElementById('chatInput').value = btn.dataset.q;
+    form.requestSubmit();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('chatForm');
+    if (!form) return;
+
+    const input = document.getElementById('chatInput');
+    const send = document.getElementById('chatSend');
+    const history = [];
+
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const msg = input.value.trim();
+        if (!msg || send.disabled) return;
+        input.value = '';
+        chatRender(msg, 'user');
+        history.push({ role: 'user', content: msg });
+
+        const think = chatRender('…', 'bot');
+        send.disabled = true;
+
+        try {
+            const res = await fetch(BASE + 'chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || '',
+                },
+                body: JSON.stringify({ message: msg, history: history.slice(-10, -1) }),
+            });
+            const data = await res.json();
+            think.remove();
+            const reply = data.reply || 'Maaf, tidak ada jawaban.';
+            chatRender(reply, 'bot');
+            history.push({ role: 'assistant', content: reply });
+        } catch (err) {
+            think.remove();
+            chatRender('Gagal kirim: ' + err.message, 'bot');
+        } finally {
+            send.disabled = false;
+            input.focus();
+        }
+    });
+});
+
+window.toggleChat = toggleChat;
+window.askQuick = askQuick;

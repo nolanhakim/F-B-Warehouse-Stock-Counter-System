@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{{ $title ?? 'Gudang F&B' }} — F&B Warehouse System</title>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <base href="{{ url('/') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -155,6 +156,43 @@
     <div class="lg:hidden pb-16"></div>
 
     <x-toast />
+
+    @if(session()->has('role'))
+    <button type="button" id="chatFab" onclick="toggleChat()" title="Tanya asisten gudang"
+        class="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full bg-brand hover:bg-brand-dark text-white shadow-xl flex items-center justify-center active:scale-95 transition">
+        <svg id="chatFabIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7v3c0 1 .4 1.9 1 2.6V17a1 1 0 0 0 1 1h1v2a1 1 0 0 0 2 0v-2h4v2a1 1 0 0 0 2 0v-2h1a1 1 0 0 0 1-1v-2.4c.6-.7 1-1.6 1-2.6V9a7 7 0 0 0-7-7zM8 9.5A1.5 1.5 0 1 1 9.5 11 1.5 1.5 0 0 1 8 9.5zm8 0A1.5 1.5 0 1 1 17.5 11 1.5 1.5 0 0 1 16 9.5z"/></svg>
+    </button>
+
+    <div id="chatPanel" class="hidden fixed bottom-36 lg:bottom-24 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] max-w-sm bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden page-enter">
+        <div class="bg-canvas text-ink px-4 py-3 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-brand flex items-center justify-center font-bold">F</div>
+            <div class="min-w-0 flex-1">
+                <div class="font-semibold text-sm">Asisten Gudang</div>
+                <div class="text-[11px] text-muted">Tanya stok, expired, atau cara pakai</div>
+            </div>
+            <button type="button" onclick="toggleChat()" class="p-1.5 rounded-md text-muted hover:text-ink hover:bg-surface transition" title="Tutup">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.3 5.7 12 12l-6.3-6.3-1.4 1.4L10.6 13.4l-6.3 6.3 1.4 1.4L12 14.8l6.3 6.3 1.4-1.4-6.3-6.3 6.3-6.3-1.4-1.4z"/></svg>
+            </button>
+        </div>
+        <div id="chatLog" class="h-80 overflow-y-auto p-4 space-y-3 text-sm bg-slate-50">
+            <div class="flex gap-2">
+                <div class="max-w-[85%] bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm">
+                    Halo 👋 Aku bisa cek <b>stok live</b>, <b>expired FEFO</b>, atau pandu <b>inbound / outbound / waste / opname</b>. Coba tanya: <i>"stok menipis apa saja?"</i>
+                </div>
+            </div>
+        </div>
+        <div id="chatQuick" class="px-3 pt-2 pb-1 flex gap-1.5 flex-wrap bg-slate-50">
+            <button type="button" onclick="askQuick(this)" data-q="Stok menipis apa saja?" class="text-[11px] px-2.5 py-1 rounded-full border border-slate-300 bg-white hover:border-brand hover:text-brand transition">Stok menipis?</button>
+            <button type="button" onclick="askQuick(this)" data-q="Apa yang mau expired dalam 30 hari?" class="text-[11px] px-2.5 py-1 rounded-full border border-slate-300 bg-white hover:border-brand hover:text-brand transition">Mau expired?</button>
+            <button type="button" onclick="askQuick(this)" data-q="Bagaimana cara mencatat waste?" class="text-[11px] px-2.5 py-1 rounded-full border border-slate-300 bg-white hover:border-brand hover:text-brand transition">Cara waste?</button>
+        </div>
+        <form id="chatForm" class="p-3 bg-white border-t border-slate-200 flex gap-2">
+            <input id="chatInput" type="text" autocomplete="off" maxlength="2000" placeholder="Tulis pertanyaan…"
+                class="flex-1 min-w-0 px-3 py-2 rounded-md border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+            <button type="submit" id="chatSend" class="px-3.5 py-2 rounded-md bg-brand hover:bg-brand-dark text-white text-sm font-semibold active:scale-95 transition shrink-0">Kirim</button>
+        </form>
+    </div>
+    @endif
 
     {{-- PROFILE MODAL --}}
     <div id="profileModal" class="hidden fixed inset-0 z-[60]">

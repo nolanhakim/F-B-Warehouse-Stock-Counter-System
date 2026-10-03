@@ -8,6 +8,7 @@ use App\Http\Controllers\KartuStokController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MutationController;
 use App\Http\Controllers\OpnameController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WasteController;
@@ -66,6 +67,8 @@ Route::post('/waste/{mutation}/approve', [WasteController::class, 'approve'])->n
 Route::post('/waste/{mutation}/reject', [WasteController::class, 'reject'])->name('waste.reject');
 Route::get('/alerts', [AlertsController::class, 'index'])->name('alerts');
 page_route('cari', 'Cari Stok / Rak');
+
+Route::post('/chat', [ChatbotController::class, 'chat'])->name('chat');
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.dynamic');
 
