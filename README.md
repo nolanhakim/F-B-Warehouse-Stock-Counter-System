@@ -282,4 +282,4 @@ Tampilan dipisah per peran di `resources/views/{role}/`, sementara bagian halama
 
 ## Lisensi
 
-MIT
+by catraliya nolan hakim, ig : catranolanhkm
